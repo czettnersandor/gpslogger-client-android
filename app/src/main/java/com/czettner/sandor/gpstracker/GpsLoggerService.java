@@ -3,11 +3,15 @@ package com.czettner.sandor.gpstracker;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 public class GpsLoggerService extends Service {
@@ -16,6 +20,9 @@ public class GpsLoggerService extends Service {
     public MyLocationListener listener;
     public Location previousBestLocation = null;
     public Intent intent;
+    public static final String BROADCAST_ACTION = "Gps Logger";
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static final String TAG = "GPS_LOGGER";
 
     public GpsLoggerService() {
     }
@@ -23,13 +30,22 @@ public class GpsLoggerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        intent = new Intent(BROADCAST_ACTION);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, listener);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, listener);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            listener = new MyLocationListener();
+            if (locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, listener);
+            }
+            if (locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, listener);
+            }
+        }
         Toast.makeText(this, "Service started", Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
@@ -37,7 +53,10 @@ public class GpsLoggerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationManager.removeUpdates(listener);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.removeUpdates(listener);
+        }
         Toast.makeText(this, "Service stopped", Toast.LENGTH_LONG).show();
     }
 
@@ -103,7 +122,7 @@ public class GpsLoggerService extends Service {
 
         public void onLocationChanged(final Location loc)
         {
-            // Log.i("**************************************", "Location changed");
+            Log.i(TAG, "Location changed");
             if(isBetterLocation(loc, previousBestLocation)) {
                 loc.getLatitude();
                 loc.getLongitude();
