@@ -1,6 +1,9 @@
 package com.czettner.sandor.gpstracker;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        changeStatusText();
     }
 
     @Override
@@ -51,21 +61,54 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void changeStatusText() {
+        TextView t = (TextView) findViewById(R.id.textView);
+        if (isServiceRunning(GpsLoggerService.class)) {
+            t.setText(R.string.logger_running);
+        } else {
+            t.setText(R.string.logger_stopped);
+        }
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Start button
+     *
      * @param view
      */
     public void startService(View view) {
         Intent intent = new Intent(this, GpsLoggerService.class);
         startService(intent);
+        changeStatusText();
     }
 
     /**
      * Stop button
+     *
      * @param view
      */
     public void stopService(View view) {
         Intent intent = new Intent(this, GpsLoggerService.class);
         stopService(intent);
+        changeStatusText();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 }

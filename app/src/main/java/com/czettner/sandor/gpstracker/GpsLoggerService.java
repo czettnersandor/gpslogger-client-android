@@ -1,5 +1,6 @@
 package com.czettner.sandor.gpstracker;
 
+import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +21,7 @@ public class GpsLoggerService extends Service {
     public MyLocationListener listener;
     public Location previousBestLocation = null;
     public Intent intent;
-    public static final String BROADCAST_ACTION = "Gps Logger";
+    public static final String BROADCAST_ACTION = "com.czettner.sandor.gpstracker.action.POST_LOCATION";
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final String TAG = "GPS_LOGGER";
 
@@ -117,11 +118,9 @@ public class GpsLoggerService extends Service {
         return provider1.equals(provider2);
     }
 
-    public class MyLocationListener implements LocationListener
-    {
+    public class MyLocationListener implements LocationListener {
 
-        public void onLocationChanged(final Location loc)
-        {
+        public void onLocationChanged(final Location loc) {
             Log.i(TAG, "Location changed");
             if(isBetterLocation(loc, previousBestLocation)) {
                 loc.getLatitude();
@@ -131,6 +130,19 @@ public class GpsLoggerService extends Service {
                 intent.putExtra("Provider", loc.getProvider());
                 sendBroadcast(intent);
 
+                Intent intentService = new Intent(getApplicationContext(),
+                        GpsLogSenderService.class);
+                intentService.putExtra("Latitude", loc.getLatitude());
+                intentService.putExtra("Longitude", loc.getLongitude());
+                startService(intentService);
+
+                GpsLogSenderService.startActionPostLocation(
+                        getApplicationContext(),
+                        loc.getLatitude(),
+                        loc.getLongitude(),
+                        System.currentTimeMillis(),
+                        "Device id hash" // TODO
+                );
             }
         }
 

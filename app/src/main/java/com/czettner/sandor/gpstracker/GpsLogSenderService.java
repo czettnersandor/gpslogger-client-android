@@ -29,7 +29,7 @@ public class GpsLogSenderService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionPostLocation(Context context, String lat, String lng, String timestamp, String hash) {
+    public static void startActionPostLocation(Context context, Double lat, Double lng, long timestamp, String hash) {
         Intent intent = new Intent(context, GpsLogSenderService.class);
         intent.setAction(ACTION_POST_LOCATION);
         intent.putExtra(EXTRA_LAT, lat);
