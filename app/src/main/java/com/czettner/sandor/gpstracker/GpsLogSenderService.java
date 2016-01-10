@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -33,7 +34,6 @@ public class GpsLogSenderService extends IntentService {
 
     public GpsLogSenderService() {
         super("GpsLogSenderService");
-        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
 
     /**
@@ -50,6 +50,12 @@ public class GpsLogSenderService extends IntentService {
         intent.putExtra(EXTRA_HASH, hash);
         intent.putExtra(EXTRA_LNG, lng);
         context.startService(intent);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
 
     @Override
@@ -76,11 +82,17 @@ public class GpsLogSenderService extends IntentService {
         URL url;
         HttpURLConnection connection = null;
         String targetURL = getServerUrl();
-        String urlParameters =
-                "lat=" + URLEncoder.encode("", "UTF-8") +
-                "&lng=" + URLEncoder.encode("???", "UTF-8") +
-                "&timestamp=" + URLEncoder.encode("???", "UTF-8") +
-                "&hash=" + URLEncoder.encode("???", "UTF-8");
+        String urlParameters;
+        try {
+            urlParameters =
+                    "lat=" + URLEncoder.encode("", "UTF-8") +
+                            "&lng=" + URLEncoder.encode("???", "UTF-8") +
+                            "&timestamp=" + URLEncoder.encode("???", "UTF-8") +
+                            "&hash=" + URLEncoder.encode("???", "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return;
+        }
         try {
             //Create connection
             url = new URL(targetURL);
@@ -115,14 +127,9 @@ public class GpsLogSenderService extends IntentService {
             }
             rd.close();
             Log.i(TAG, response.toString());
-
         } catch (Exception e) {
-
             e.printStackTrace();
-            return null;
-
         } finally {
-
             if(connection != null) {
                 connection.disconnect();
             }

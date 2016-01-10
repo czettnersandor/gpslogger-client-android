@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -14,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,14 +27,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
 
@@ -134,6 +125,24 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, GpsLoggerService.class);
         stopService(intent);
         changeStatusText();
+    }
+
+    /**
+     * Save action (toolbar)
+     *
+     * @param MenuItem
+     */
+    public void saveSettings(MenuItem item) {
+        SharedPreferences.Editor editor = settings.edit();
+        EditText e = (EditText) findViewById(R.id.editText);
+        String url = e.getText().toString();
+        EditText e2 = (EditText) findViewById(R.id.editText2);
+        String device_id = e2.getText().toString();
+
+        editor.putString("url", url);
+        editor.putString("device_id", device_id);
+        editor.apply();
+        Toast.makeText(getApplicationContext(), "Configuration saved", Toast.LENGTH_SHORT).show();
     }
 
     @Override
