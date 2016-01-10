@@ -3,7 +3,7 @@ package com.czettner.sandor.gpstracker;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,9 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    protected SharedPreferences settings;
+    protected String url;
+    protected String device_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +36,14 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         changeStatusText();
+        loadSettings();
     }
 
     @Override
@@ -68,6 +75,33 @@ public class MainActivity extends AppCompatActivity {
         } else {
             t.setText(R.string.logger_stopped);
         }
+    }
+
+    protected void loadSettings() {
+        url = settings.getString("url", url);
+        device_id = settings.getString("device_id", url);
+        boolean editChanged = false;
+        SharedPreferences.Editor editor = settings.edit();
+        if (url == null || url.isEmpty()) {
+            // If empty, save with default
+            url = getString(R.string.default_url);
+            editor.putString("url", url);
+            editChanged = true;
+        }
+        if (device_id == null || device_id.isEmpty()) {
+            device_id = getString(R.string.default_device_id);
+            editor.putString("device_id", device_id);
+            editChanged = true;
+        }
+
+        if (editChanged) {
+            editor.apply();
+        }
+
+        EditText e = (EditText) findViewById(R.id.editText);
+        e.setText(url);
+        EditText e2 = (EditText) findViewById(R.id.editText2);
+        e2.setText(device_id);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
