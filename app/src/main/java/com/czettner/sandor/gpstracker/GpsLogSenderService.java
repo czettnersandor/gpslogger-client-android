@@ -85,10 +85,10 @@ public class GpsLogSenderService extends IntentService {
         String urlParameters;
         try {
             urlParameters =
-                    "lat=" + URLEncoder.encode("", "UTF-8") +
-                            "&lng=" + URLEncoder.encode("???", "UTF-8") +
-                            "&timestamp=" + URLEncoder.encode("???", "UTF-8") +
-                            "&hash=" + URLEncoder.encode("???", "UTF-8");
+                    "lat=" + URLEncoder.encode(Double.toString(lat), "UTF-8") +
+                            "&lng=" + URLEncoder.encode(Double.toString(lng), "UTF-8") +
+                            "&timestamp=" + URLEncoder.encode(Double.toString(timestamp), "UTF-8") +
+                            "&hash=" + URLEncoder.encode(hash, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return;

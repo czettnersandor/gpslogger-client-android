@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,7 +24,10 @@ public class GpsLoggerService extends Service {
     public Intent intent;
     public static final String BROADCAST_ACTION = "com.czettner.sandor.gpstracker.action.POST_LOCATION";
     private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static final int TWENTY_MINUTES = 1000 * 60 * 20;
+    private static final int MIN_DISTANCE = 20;
     private static final String TAG = "GPS_LOGGER";
+    private SharedPreferences settings;
 
     public GpsLoggerService() {
     }
@@ -32,6 +36,7 @@ public class GpsLoggerService extends Service {
     public void onCreate() {
         super.onCreate();
         intent = new Intent(BROADCAST_ACTION);
+        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
 
     @Override
@@ -41,10 +46,10 @@ public class GpsLoggerService extends Service {
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             listener = new MyLocationListener();
             if (locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, listener);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, TWENTY_MINUTES, MIN_DISTANCE, listener);
             }
             if (locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, listener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWENTY_MINUTES, MIN_DISTANCE, listener);
             }
         }
         Toast.makeText(this, "Service started", Toast.LENGTH_LONG).show();
@@ -108,8 +113,6 @@ public class GpsLoggerService extends Service {
         return false;
     }
 
-
-
     /** Checks whether two providers are the same */
     private boolean isSameProvider(String provider1, String provider2) {
         if (provider1 == null) {
@@ -129,12 +132,6 @@ public class GpsLoggerService extends Service {
                 intent.putExtra("Longitude", loc.getLongitude());
                 intent.putExtra("Provider", loc.getProvider());
                 sendBroadcast(intent);
-
-                Intent intentService = new Intent(getApplicationContext(),
-                        GpsLogSenderService.class);
-                intentService.putExtra("Latitude", loc.getLatitude());
-                intentService.putExtra("Longitude", loc.getLongitude());
-                startService(intentService);
 
                 GpsLogSenderService.startActionPostLocation(
                         getApplicationContext(),
