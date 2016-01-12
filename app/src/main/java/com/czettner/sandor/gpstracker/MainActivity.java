@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void loadSettings() {
-        url = settings.getString("url", url);
-        device_id = settings.getString("device_id", url);
+        url = settings.getString("url", "");
+        device_id = settings.getString("device_id", "");
         boolean editChanged = false;
         SharedPreferences.Editor editor = settings.edit();
         if (url == null || url.isEmpty()) {
@@ -125,6 +125,15 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, GpsLoggerService.class);
         stopService(intent);
         changeStatusText();
+    }
+
+    /**
+     * Send Now button
+     *
+     * @param view
+     */
+    public void sendNow(View view) {
+        // TODO
     }
 
     /**
