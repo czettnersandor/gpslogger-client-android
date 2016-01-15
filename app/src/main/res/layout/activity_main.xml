@@ -7,6 +7,10 @@
     android:fitsSystemWindows="true"
     tools:context="com.czettner.sandor.gpstracker.MainActivity">
 
+    <org.osmdroid.views.MapView android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

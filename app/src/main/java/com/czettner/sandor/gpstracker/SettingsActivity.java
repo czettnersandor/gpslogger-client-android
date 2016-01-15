@@ -151,7 +151,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putString("url", url);
         editor.putString("device_id", device_id);
         editor.apply();
-        Toast.makeText(getApplicationContext(), "Configuration saved", Toast.LENGTH_SHORT).show();
         this.finish();
     }
 

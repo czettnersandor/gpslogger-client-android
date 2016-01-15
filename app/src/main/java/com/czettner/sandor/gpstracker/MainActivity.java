@@ -12,9 +12,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import org.osmdroid.api.IMapController;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.MapView;
+
 public class MainActivity extends AppCompatActivity {
 
     protected SharedPreferences settings;
+    IMapController mapController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +27,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        MapView map = (MapView) findViewById(R.id.map);
+        map.setTileSource(TileSourceFactory.MAPNIK);
+        map.setBuiltInZoomControls(true);
+        map.setMultiTouchControls(true);
+        mapController = map.getController();
+        mapController.setZoom(9);
 
         settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
     }
