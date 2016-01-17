@@ -137,7 +137,7 @@ public class GpsLoggerService extends Service {
                         getApplicationContext(),
                         loc.getLatitude(),
                         loc.getLongitude(),
-                        System.currentTimeMillis(),
+                        System.currentTimeMillis() / 1000,
                         settings.getString("device_id", "")
                 );
             }

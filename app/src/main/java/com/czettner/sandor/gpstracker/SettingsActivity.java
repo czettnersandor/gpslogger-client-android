@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -139,7 +138,7 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * Save action (toolbar)
      *
-     * @param MenuItem
+     * @param item
      */
     public void saveSettings(MenuItem item) {
         SharedPreferences.Editor editor = settings.edit();
