@@ -17,6 +17,11 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity {
 
     protected SharedPreferences settings;
@@ -51,6 +56,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class LoadHistory extends AsyncTask {
-        // TODO: http://www.learn2crack.com/2014/06/android-load-image-from-internet.html
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // TODO: loading indicator
+        }
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            // TODO: http://developer.android.com/reference/java/net/HttpURLConnection.html
+            URL url = new URL("http://www.android.com/");
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            try {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                readStream(in);
+            } finally {
+                urlConnection.disconnect();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+        }
     }
 }
