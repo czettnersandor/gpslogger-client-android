@@ -10,9 +10,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.SimpleLocationOverlay;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,8 +30,13 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    protected SharedPreferences settings;
-    IMapController mapController;
+    private SharedPreferences settings;
+    MapView map;
+    private IMapController mapController;
+    private SimpleLocationOverlay myLocationOverlay;
+    private ScaleBarOverlay scaleBarOverlay;
+    private ItemizedIconOverlay<OverlayItem> currentLocationOverlay;
+    private DefaultResourceProxyImpl resourceProxy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +44,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        MapView map = (MapView) findViewById(R.id.map);
+        map = (MapView) findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
         mapController = map.getController();
         mapController.setZoom(9);
+        myLocationOverlay = new SimpleLocationOverlay(this);
+        map.getOverlays().add(myLocationOverlay);
+        scaleBarOverlay = new ScaleBarOverlay(this);
+        map.getOverlays().add(scaleBarOverlay);
+        // TODO: http://stackoverflow.com/questions/10319094/adding-overlay-to-a-mapview-in-osmdroid
+
         settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
         String hash = settings.getString("device_id", "");
         new LoadHistory().execute(settings.getString("url", "") + "/history/" + hash);
@@ -71,10 +90,28 @@ public class MainActivity extends AppCompatActivity {
                 json = doHttpUrlConnectionAction(urls[0]);
             } catch (Exception e) {
                 // TODO
+                e.printStackTrace();
             }
-            // TODO: use json
             Log.v(TAG, json);
+            try {
+                // Add markers to the map
+                addMapMarkers(json);
+            } catch (JSONException e) {
+                // TODO
+                e.printStackTrace();
+            }
             return json;
+        }
+
+        protected void addMapMarkers(String json) throws JSONException {
+            JSONObject obj = new JSONObject(json);
+            String pageName = obj.getJSONObject("pageInfo").getString("pageName");
+
+            JSONArray arr = obj.getJSONArray("posts");
+            for (int i = 0; i < arr.length(); i++)
+            {
+                String post_id = arr.getJSONObject(i).getString("post_id");
+            }
         }
 
         @Override
