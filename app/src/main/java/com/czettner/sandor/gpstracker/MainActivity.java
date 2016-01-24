@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -56,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
         map.getOverlays().add(scaleBarOverlay);
         // TODO: http://stackoverflow.com/questions/10319094/adding-overlay-to-a-mapview-in-osmdroid
 
-        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+
         String hash = settings.getString("device_id", "");
         new LoadHistory().execute(settings.getString("url", "") + "/history/" + hash);
     }

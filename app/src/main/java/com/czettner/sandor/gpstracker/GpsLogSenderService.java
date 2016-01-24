@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -55,7 +56,7 @@ public class GpsLogSenderService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override

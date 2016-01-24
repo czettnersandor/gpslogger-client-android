@@ -1,6 +1,5 @@
 package com.czettner.sandor.gpstracker;
 
-import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -36,7 +36,7 @@ public class GpsLoggerService extends Service {
     public void onCreate() {
         super.onCreate();
         intent = new Intent(BROADCAST_ACTION);
-        settings = getSharedPreferences(getString(R.string.preference_file_key), CONTEXT_IGNORE_SECURITY);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
