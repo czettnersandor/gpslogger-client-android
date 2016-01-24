@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 json = doHttpUrlConnectionAction(urls[0]);
             } catch (Exception e) {
                 // TODO
+                json = "nothing";
                 e.printStackTrace();
             }
             Log.v(TAG, json);
