@@ -19,6 +19,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
@@ -82,10 +83,33 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
+
+                // Start service if option changed
+                if (preference.getKey().equals("running")) {
+                    Context context = preference.getContext();
+                    boolean isRunning = isServiceRunning(context, GpsLoggerService.class);
+                    if (stringValue.equals("false") & isRunning) {
+                        Intent intent = new Intent(context, GpsLoggerService.class);
+                        context.stopService(intent);
+                    } else if (stringValue.equals("true") & !isRunning) {
+                        Intent intent = new Intent(context, GpsLoggerService.class);
+                        context.startService(intent);
+                    }
+                }
             }
             return true;
         }
     };
+
+    private static boolean isServiceRunning(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -116,6 +140,19 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
                 .getDefaultSharedPreferences(preference.getContext())
                 .getString(preference.getKey(), ""));
     }
+
+    private static void bindPreferenceRunning(Preference preference) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+            PreferenceManager
+                .getDefaultSharedPreferences(preference.getContext())
+                .getBoolean(preference.getKey(), false));
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,13 +217,14 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("device_id"));
             bindPreferenceSummaryToValue(findPreference("url"));
+            bindPreferenceRunning(findPreference("running"));
         }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                startActivity(new Intent(getActivity(), MainActivity.class));
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -216,7 +254,7 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                startActivity(new Intent(getActivity(), MainActivity.class));
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -246,7 +284,7 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                startActivity(new Intent(getActivity(), MainActivity.class));
                 return true;
             }
             return super.onOptionsItemSelected(item);

@@ -1,5 +1,7 @@
 package com.czettner.sandor.gpstracker;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -61,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
 
         String hash = settings.getString("device_id", "");
         new LoadHistory().execute(settings.getString("url", "") + "/history/" + hash);
+        if (!isServiceRunning(GpsLoggerService.class) && settings.getBoolean("running", false)) {
+            Intent intent = new Intent(this, GpsLoggerService.class);
+            startService(intent);
+        }
     }
 
     @Override
@@ -73,6 +79,16 @@ public class MainActivity extends AppCompatActivity {
     public void settingsClick(MenuItem item) {
         Intent intent = new Intent(this, PreferencesActivity.class);
         startActivity(intent);
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private class LoadHistory extends AsyncTask<String, Void, String> {
